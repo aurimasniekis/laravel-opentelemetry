@@ -4,6 +4,11 @@ use Keepsuit\LaravelOpenTelemetry\Instrumentation;
 
 return [
     /**
+     * Enable OpenTelemetry
+     */
+    'enabled' => env('OTEL_ENABLED', true),
+
+    /**
      * Service name
      */
     'service_name' => env('OTEL_SERVICE_NAME', \Illuminate\Support\Str::slug((string) env('APP_NAME', 'laravel-app'))),
@@ -13,6 +18,18 @@ return [
      * Supports any otel propagator, for example: "tracecontext", "baggage", "b3", "b3multi", "none"
      */
     'propagators' => env('OTEL_PROPAGATORS', 'tracecontext'),
+
+    /**
+     * OpenTelemetry Meter configuration
+     */
+    'metrics' => [
+        /**
+         * Metrics exporter
+         * This should be the key of one of the exporters defined in the exporters section
+         * Supported drivers: "otlp", "console", "null"
+         */
+        'exporter' => env('OTEL_INSTRUMENTATIONS_EXPORTER', 'otlp'),
+    ],
 
     /**
      * OpenTelemetry Traces configuration
@@ -76,7 +93,7 @@ return [
     /**
      * OpenTelemetry exporters
      *
-     * Here you can configure exports used by traces and logs.
+     * Here you can configure exports used by metrics, traces and logs.
      * If you want to use the same protocol with different endpoints,
      * you can copy the exporter with a different and change the endpoint
      *
@@ -130,6 +147,19 @@ return [
         Instrumentation\EventInstrumentation::class => [
             'enabled' => env('OTEL_INSTRUMENTATION_EVENT', true),
             'ignored' => [],
+        ],
+
+        Instrumentation\PhpFpmInstrumentation::class => [
+            'enabled' => env('OTEL_INSTRUMENTATION_FPM', true),
+            'prefix' => env('OTEL_INSTRUMENTATION_FPM_PREFIX', 'php_fpm_'),
+            'pool' => env('OTEL_INSTRUMENTATION_FPM_POOL', true),
+            'processes' => env('OTEL_INSTRUMENTATION_FPM_PROCESSES', true),
+        ],
+
+        Instrumentation\PhpOpcacheInstrumentation::class => [
+            'enabled' => env('OTEL_INSTRUMENTATION_OPCACHE', true),
+            'prefix' => env('OTEL_INSTRUMENTATION_OPCACHE_PREFIX', 'php_opcache_'),
+            'scripts' => env('OTEL_INSTRUMENTATION_OPCACHE_SCRIPTS', false),
         ],
     ],
 ];
